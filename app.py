@@ -4,47 +4,46 @@ import plotly.express as px
 import time
 
 # --- 🛠️ CONFIGURATION ZONE 🛠️ ---
-# 1. Grab the long string between /d/ and /edit in your URL
-SHEET_ID = "1v_5DVdLPntHfPXjHSKK605f5l0m0F4LOTXTsXm1HbI" 
+# I've already locked in your Sheet ID 🔒
+SHEET_ID = "1v_5DVdLPntHfPXjHSKK605f5l0m0F4LOTXTsXm1HbIo"
 
-# 2. Grab the number after 'gid=' in your URL (Sheet4's specific ID)
-SHEET_GID = "420875998" # Change this! (e.g., '123456789')
+# ⚠️ ACTION REQUIRED: Replace '0' with the GID for Sheet4 ⚠️
+# Open your Google Sheet > Click 'Sheet4' tab > Look at URL > Copy number after 'gid='
+SHEET_GID = "420875998" 
 
-# 3. Refresh Rate (60s is the sweet spot)
+# How often to check for new trades (in seconds)
 REFRESH_RATE = 60
 
-# Construct the magic URL
+# The Magic Link 🔗
 CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={SHEET_GID}"
 
-st.set_page_config(page_title="Darwin 2.0 🧬 | Cloud Monitor", layout="wide", page_icon="🧬")
+st.set_page_config(page_title="Darwin 2.0 🧬 | Live Monitor", layout="wide", page_icon="🧬")
 
-# --- DATA LOADER (CLOUD EDITION) ☁️ ---
-# We don't cache this strictly because we want live updates in the loop
+# --- DATA LOADER ---
 def get_data():
     try:
-        # Read directly from the Google cloud
+        # Pulling fresh data straight from the cloud ☁️
         df = pd.read_csv(CSV_URL)
         
-        # Cleanups - similar to before
+        # Data Hygiene 🧼
         if 'Open Time' in df.columns:
             df['Open Time'] = pd.to_datetime(df['Open Time'])
         
-        # Numeric conversion for safety
-        cols_to_numeric = ['PnL', 'Running']
+        # Ensure numbers are numbers (handling any messy Excel formatting)
+        cols_to_numeric = ['PnL', 'Running', 'Balance']
         for col in cols_to_numeric:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
                 
         return df
     except Exception as e:
-        # If it fails, it's usually a permission thing or wrong ID
         return None
 
 # --- MAIN DASHBOARD ---
-st.title("🧬 Darwin 2.0: Live Cloud Link")
-st.caption(f"Tracking Sheet4 via Google Cloud • Refreshing every {REFRESH_RATE}s")
+st.title("🧬 Darwin 2.0: Live Performance")
+st.markdown(f"**Status:** `ONLINE` 🟢 | **Source:** `Google Sheet (Sheet4)` | **Refresh:** `{REFRESH_RATE}s`")
 
-# Container for auto-refreshing content
+# Container for the live updates
 placeholder = st.empty()
 
 while True:
@@ -52,69 +51,71 @@ while True:
     
     if df is not None and not df.empty:
         with placeholder.container():
-            # 1. TOP METRICS
-            # Filter actual trades
-            # Adjust 'Strategy' column name if it varies in your live sheet
+            # --- 1. THE METRICS ---
+            # Filtering for 'Darwin_2.0' to ignore any manual noise
             if 'Strategy' in df.columns:
-                real_trades = df[df['Strategy'] == 'Darwin_2.0']
+                df_strat = df[df['Strategy'] == 'Darwin_2.0']
             else:
-                real_trades = df # Fallback if column missing
+                df_strat = df
 
-            closed_trades = real_trades[real_trades['PnL'] != 0] 
+            # Filter closed trades (PnL not 0)
+            closed = df_strat[df_strat['PnL'] != 0]
             
-            total_pnl = df['Running'].iloc[-1]
-            total_trades = len(closed_trades)
+            # Key Stats
+            total_profit = df['Running'].iloc[-1] if 'Running' in df.columns else 0.0
+            total_trades = len(closed)
             
-            # Win Rate Calculation
-            wins = closed_trades[closed_trades['PnL'] > 0]
-            losses = closed_trades[closed_trades['PnL'] < 0]
+            # Win Rate & Profit Factor Logic
+            wins = closed[closed['PnL'] > 0]
+            losses = closed[closed['PnL'] < 0]
             
-            if len(closed_trades) > 0:
-                win_rate = (len(wins) / len(closed_trades) * 100)
-            else:
-                win_rate = 0
+            win_rate = (len(wins) / len(closed) * 100) if len(closed) > 0 else 0.0
             
-            # Profit Factor
-            gross_profit = wins['PnL'].sum()
+            gross_win = wins['PnL'].sum()
             gross_loss = abs(losses['PnL'].sum())
-            profit_factor = (gross_profit / gross_loss) if gross_loss > 0 else 0
+            pf = (gross_win / gross_loss) if gross_loss > 0 else 0.0
 
-            # Metric Cards
+            # Display KPIs
             kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-            kpi1.metric("💰 Net Profit", f"${total_pnl:.2f}")
+            kpi1.metric("💰 Net Profit", f"${total_profit:.2f}", delta_color="normal")
             kpi2.metric("🎯 Win Rate", f"{win_rate:.1f}%")
-            kpi3.metric("⚖️ Profit Factor", f"{profit_factor:.2f}")
+            kpi3.metric("⚖️ Profit Factor", f"{pf:.2f}")
             kpi4.metric("📊 Total Trades", total_trades)
 
             st.markdown("---")
 
-            # 2. THE COMPOUNDING CURVE
-            col_chart, col_recent = st.columns([2, 1])
+            # --- 2. THE VISUALS ---
+            col_left, col_right = st.columns([2, 1])
             
-            with col_chart:
-                st.subheader("📈 Account Growth")
+            with col_left:
+                st.subheader("📈 The Compounding Curve")
                 if 'Open Time' in df.columns and 'Running' in df.columns:
                     fig_equity = px.area(df, x='Open Time', y='Running', 
-                                         title='Cumulative PnL',
-                                         labels={'Running': 'Balance ($)'})
+                                         title='Account Growth Over Time',
+                                         labels={'Running': 'Balance ($)', 'Open Time': 'Date'})
                     fig_equity.update_traces(line_color='#00FF7F', fill_color='rgba(0, 255, 127, 0.1)')
+                    fig_equity.update_layout(height=450)
                     st.plotly_chart(fig_equity, use_container_width=True)
-                else:
-                    st.warning("Waiting for more data points...")
 
-            with col_recent:
-                st.subheader("📋 Last 5 Trades")
-                cols_to_show = ['Pair', 'Type', 'PnL', 'Reason'] # Adjusted based on your CSV headers
-                # Check if columns exist before showing
-                available_cols = [c for c in cols_to_show if c in df.columns]
+            with col_right:
+                st.subheader("📋 Last 5 Events")
+                # Showing the latest action
+                cols_to_show = ['Pair', 'Type', 'PnL', 'Reason']
+                valid_cols = [c for c in cols_to_show if c in df.columns]
                 
-                if available_cols:
-                    recent = df[available_cols].tail(5).iloc[::-1]
-                    st.dataframe(recent, use_container_width=True, hide_index=True)
-    
-    elif df is None:
+                if valid_cols:
+                    recent_trades = df[valid_cols].tail(5).iloc[::-1]
+                    st.dataframe(recent_trades, use_container_width=True, hide_index=True)
+                
+                st.info("The dashboard will auto-refresh when your bot closes a trade and updates the sheet. ⚡")
+
+    else:
+        # Error handling if the link is broken
         with placeholder.container():
-            st.error("🚫 Connection Error! Double check your SHEET_ID and make sure the sheet is Public (Viewer).")
-            st.code(f"Current URL being tried:\n{CSV_URL}")
+            st.error("🚫 Connection Failed!")
+            st.warning("1. Check if the Google Sheet is set to 'Anyone with the link' -> 'Viewer'.")
+            st.warning("2. Make sure you updated the SHEET_GID in the code to match 'Sheet4'.")
+            st.code(CSV_URL)
             
+    # Sleep to prevent hitting Google's rate limits
     time.sleep(REFRESH_RATE)
