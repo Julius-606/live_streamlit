@@ -5,7 +5,7 @@ import time
 
 # --- 🛠️ CONFIGURATION ZONE 🛠️ ---
 # 1. Grab the long string between /d/ and /edit in your URL
-SHEET_ID = "YOUR_SHEET_ID_GOES_HERE" 
+SHEET_ID = "1v_5DVdLPntHfPXjHSKK605f5l0m0F4LOTXTsXm1HbI" 
 
 # 2. Grab the number after 'gid=' in your URL (Sheet4's specific ID)
 SHEET_GID = "0" # Change this! (e.g., '123456789')
