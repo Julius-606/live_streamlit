@@ -8,7 +8,7 @@ import time
 SHEET_ID = "1v_5DVdLPntHfPXjHSKK605f5l0m0F4LOTXTsXm1HbI" 
 
 # 2. Grab the number after 'gid=' in your URL (Sheet4's specific ID)
-SHEET_GID = "0" # Change this! (e.g., '123456789')
+SHEET_GID = "420875998" # Change this! (e.g., '123456789')
 
 # 3. Refresh Rate (60s is the sweet spot)
 REFRESH_RATE = 60
