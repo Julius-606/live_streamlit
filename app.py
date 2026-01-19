@@ -4,12 +4,11 @@ import plotly.express as px
 import time
 
 # --- 🛠️ CONFIGURATION ZONE 🛠️ ---
-# I've already locked in your Sheet ID 🔒
+# Your Sheet ID from the URL 🔒
 SHEET_ID = "1v_5DVdLPntHfPXjHSKK605f5l0m0F4LOTXTsXm1HbIo"
 
-# ⚠️ ACTION REQUIRED: Replace '0' with the GID for Sheet4 ⚠️
-# Open your Google Sheet > Click 'Sheet4' tab > Look at URL > Copy number after 'gid='
-SHEET_GID = "420875998" 
+# Your Specific Tab ID (Sheet4) 🔑
+SHEET_GID = "420875998"
 
 # How often to check for new trades (in seconds)
 REFRESH_RATE = 60
@@ -93,7 +92,9 @@ while True:
                     fig_equity = px.area(df, x='Open Time', y='Running', 
                                          title='Account Growth Over Time',
                                          labels={'Running': 'Balance ($)', 'Open Time': 'Date'})
-                    fig_equity.update_traces(line_color='#00FF7F', fill_color='rgba(0, 255, 127, 0.1)')
+                    
+                    # 🔧 FIXED: 'fillcolor' (no underscore) is the correct property
+                    fig_equity.update_traces(line_color='#00FF7F', fillcolor='rgba(0, 255, 127, 0.1)')
                     fig_equity.update_layout(height=450)
                     st.plotly_chart(fig_equity, use_container_width=True)
 
