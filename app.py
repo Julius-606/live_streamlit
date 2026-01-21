@@ -11,7 +11,7 @@ SHEET_ID = "1v_5DVdLPntHfPXjHSKK605f5l0m0F4LOTXTsXm1HbIo"
 
 # 🗂️ SHEET OPTIONS (Add your GIDs here)
 SHEET_OPTIONS = {
-    "Goldie Locks(Sheet5)": "1687533",  # 👈 Replace with real GID for Sheet5
+    "Goldie Locks (Sheet5)": "1687533",  # 👈 Replace with real GID for Sheet5
     "Darwin (Sheet4)": "420875998",
     "Sheet6 (YOLO Account)": "987654321"   # 👈 Add as many as you want
 }
