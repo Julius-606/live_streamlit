@@ -13,8 +13,8 @@ SHEET_ID = "1v_5DVdLPntHfPXjHSKK605f5l0m0F4LOTXTsXm1HbIo"
 SHEET_OPTIONS = {
     "Goldie Locks (Sheet5)": "1687533",  # 👈 Replace with real GID for Sheet5
     "Darwin (Sheet4)": "420875998",
-    "Trend_runner (Sheet1)": "0"   # 👈 Add as many as you want
-    "Turtle (Sheet2)": "633157181"   # 👈 Add as many as you want
+    "Trend_runner (Sheet1)": "0",   # 👈 Add as many as you want
+    "Turtle (Sheet2)": "633157181",   # 👈 Add as many as you want
     "Nexus (Sheet3)": "1745833649" 
 }
 
